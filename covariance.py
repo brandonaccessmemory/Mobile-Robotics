@@ -21,8 +21,8 @@ def calc_matrix(x,y):
     cov_yy = sum_y / 10 
 
     # Covariance matrix 
-    cov_matrix = np.array([cov_xx, cov_xy],
-                          [cov_xy, cov_yy])
+    cov_matrix = np.array([[cov_xx, cov_xy],
+                          [cov_xy, cov_yy]])
     
     return cov_matrix 
 
