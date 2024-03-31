@@ -38,7 +38,7 @@ class Turtlebot3():
         rclpy.init()
         self.node = rclpy.create_node("turtlebot3_move_square")
         self.node.get_logger().info("Press Ctrl + C to terminate")
-        self.vel_pub = self.node.create_publisher(Twist, "cmd_vel", 10)
+        self.vel_pub = self.node.create_publisher(Twist, "cmd_vel_2", 10)
         self.rate = self.node.create_rate(10)
 
         t = threading.Thread(target=rclpy.spin, args=(self.node,), daemon=True)
@@ -71,40 +71,25 @@ class Turtlebot3():
         # update angular velocity 
         target = [[4,0], [4,4], [0,4], [0,0]]
 
-        print("start")
-        for x,y in target:
-            print(x)
-            print(y)
 
+        for x,y in target:
             while(True):
                 # current orientation 
                 xdiff = x - self.pose.x 
                 ydiff = y - self.pose.y
                 
                 if abs(xdiff) < 0.1 and abs(ydiff) < 0.1: 
-                    print("reach target")
                     break 
 
                 reference = atan2(ydiff,xdiff) 
                 theta = self.pose.theta
                 # moving downwards, compensate for negative angle 
-                # if x == 0: 
-                #     if self.pose.theta < 0: 
-                #         controller.setPoint(reference + 2*pi)
-                #         angle = controller.update(self.pose.theta + 2*pi)
-                   
-                # else: 
-                #     controller.setPoint(reference)
-                #     angle = controller.update(self.pose.theta)
-
                 if x == 0 and y == 4: 
                     if theta < 0: 
                         theta += 2 * pi
-                        print("huh")
 
                     if reference < 0: 
                         reference += 2 * pi
-                        print("huh1")
 
                 controller.setPoint(reference)
                 angle = controller.update(theta)
@@ -112,7 +97,11 @@ class Turtlebot3():
                 msg.angular.z = angle 
                 self.vel_pub.publish(msg)
 
-        print("end")
+        # last message to terminate robot
+        msg.linear.x = 0.0 
+        msg.angular.z = 0.0 
+        self.vel_pub.publish(msg)
+
     def odom_callback(self, msg):
         # get pose = (x, y, theta) from odometry topic
         quaternion = [msg.pose.pose.orientation.x,msg.pose.pose.orientation.y,\
